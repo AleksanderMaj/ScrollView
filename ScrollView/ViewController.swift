@@ -58,17 +58,21 @@ class ViewController: UIViewController {
 
     private func adjustSmallTitleAlpha() {
         smallTitleLabel.alpha = scrollView.contentInset.top > topBarHeightRange.lowerBound
-        ? 0
-        : 1
+            ? 0
+            : 1
     }
 }
 
 extension ViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentOffsetY = scrollView.contentOffset.y
-        let topInset = (-contentOffsetY).limitedBy(topBarHeightRange)
+        let topInset = (-scrollView.contentOffset.y).limitedBy(topBarHeightRange)
+
+        // changes both contentInset and scrollIndicatorInsets
         adjustTopContentInset(topInset)
+
+        // changes top bar height
         heightConstraint?.constant = topInset
+
         adjustSmallTitleAlpha()
     }
 
@@ -76,7 +80,10 @@ extension ViewController: UIScrollViewDelegate {
                                    withVelocity velocity: CGPoint,
                                    targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let targetY = targetContentOffset.pointee.y
+
+        // snaps to a "closer" value
         let snappedTargetY = targetY.snappedTo([topBarHeightRange.lowerBound, topBarHeightRange.upperBound].map(-))
+
         targetContentOffset.pointee.y = snappedTargetY
         print("Snapped: \(targetY) -> \(snappedTargetY)")
     }
@@ -111,4 +118,3 @@ extension CGFloat {
         return result
     }
 }
-
